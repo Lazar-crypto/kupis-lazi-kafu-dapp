@@ -3,6 +3,8 @@ pragma solidity 0.8.17;
 
 import "./interface/IBuyMeACoffee.sol";
 
+// Deployed to Goerli at 0x56f9E4726A749290718cE98d9D85B43eb288f99C
+
 contract BuyMeACoffee is IBuyMeACoffe {
     address payable owner;
 
