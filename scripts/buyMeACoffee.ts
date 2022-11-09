@@ -1,23 +1,41 @@
 import { ethers } from 'hardhat';
-import { IBuyMeACoffe } from '../typechain-types/BuyMeACoffee';
+import { printBalances, printMemos } from './testFn';
 
-// return the ether balance of the given address
-export const getBalnace = async (address: string) => {
-  const balance = await ethers.provider.getBalance(address);
-  return ethers.utils.formatEther(balance);
+const main = async () => {
+  const [owner, tipper1, tipper2] = await ethers.getSigners();
+  const BuyMeACoffee = await ethers.getContractFactory('BuyMeACoffee');
+  const buyMeACoffee = await BuyMeACoffee.deploy();
+
+  await buyMeACoffee.deployed();
+  console.log('BuyMeACoffee deployed to: ', buyMeACoffee.address);
+
+  //check balances before coffe purchase
+  const addreses = [owner.address, tipper1.address, buyMeACoffee.address];
+  await printBalances(addreses);
+
+  const tip = { value: ethers.utils.parseEther('1') };
+
+  await buyMeACoffee
+    .connect(tipper1)
+    .buyMeACoffe('Srecko', 'Evo ti jedan kafucino', tip);
+  await buyMeACoffee
+    .connect(tipper2)
+    .buyMeACoffe('Rodja', 'Moze jedan viskac', tip);
+
+  //check balances after coffe purchase
+  await printBalances(addreses);
+
+  //check balances and memos after withdrawing tips
+  await buyMeACoffee.connect(owner).withdrawTips();
+  await printBalances(addreses);
+  const memos = await buyMeACoffee.connect(owner).getMemos();
+  await printMemos(memos);
 };
 
-// log the ether balances of the given addreses
-export const printBalances = async (addreses: string[]) => {
-  for (const address of addreses)
-    console.log(
-      `Address: ${address} has balance of `,
-      await getBalnace(address)
-    );
-};
+// We recommend this pattern to be able to use async/await everywhere
+// and properly handle errors.
+main().catch((error) => {
+  console.error(error);
 
-// log all the memos stored on chain from coffee purchases
-export const printMemos = async (memos: IBuyMeACoffe.MemoStructOutput[]) => {
-  for (const memo of memos)
-    console.log(`At ${memo.timestamp}, ${memo.name} said: ${memo.message}`);
-};
+  process.exitCode = 1;
+});
