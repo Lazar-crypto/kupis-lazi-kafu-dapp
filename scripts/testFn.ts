@@ -2,13 +2,13 @@ import { ethers } from 'hardhat';
 import { IBuyMeACoffe } from '../typechain-types/BuyMeACoffee';
 
 // return the ether balance of the given address
-export const getBalnace = async (address: string) => {
+export const getBalnace = async (address: string): Promise<string> => {
   const balance = await ethers.provider.getBalance(address);
   return ethers.utils.formatEther(balance);
 };
 
 // log the ether balances of the given addreses
-export const printBalances = async (addreses: string[]) => {
+export const printBalances = async (addreses: string[]): Promise<void> => {
   for (const address of addreses)
     console.log(
       `Address: ${address} has balance of `,
@@ -17,7 +17,9 @@ export const printBalances = async (addreses: string[]) => {
 };
 
 // log all the memos stored on chain from coffee purchases
-export const printMemos = async (memos: IBuyMeACoffe.MemoStructOutput[]) => {
+export const printMemos = async (
+  memos: IBuyMeACoffe.MemoStructOutput[]
+): Promise<void> => {
   for (const memo of memos)
     console.log(`At ${memo.timestamp}, ${memo.name} said: ${memo.message}`);
 };
